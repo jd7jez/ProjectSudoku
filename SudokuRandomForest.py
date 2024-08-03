@@ -12,33 +12,21 @@ class SudokuRandomForest:
         self.sb = SudokuBoard(self.width)
 
 
-    def get_boards(self, num_boards=100):
-        # Initialize the unsolved and solved boards
-        unsolved = []
-        solved = []
-
-        # Get the number of desired boards
-        for _ in range(num_boards):
-            # Save the boards to the running collection of boards
-            boards = self.sb.generate_board_pair()
-            unsolved.append(np.array(boards[0]).flatten())
-            solved.append(np.array(boards[1]).flatten())
-
-        # Return the collection of solved and unsolved
-        return np.array(unsolved), np.array(solved)
+    def get_boards(self, num_boards=100, filename=None):
+        unsolved, solved = self.sb.generate_board_pairs(num_boards=num_boards, filename=filename)
+        unsolved, solved = np.array(unsolved).reshape((num_boards, 81)), np.array(solved).reshape((num_boards, 81))
+        return unsolved, solved
 
     def get_model(self, n_estimators=100, random_state=42):
         # Return a RandomForestClassifier model with the specified properties or the default ones
         return RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
 
-    def train_model(self, model, num_boards):
-        # Train the model with the desired number of boards
-        x_train, y_train = self.get_boards(num_boards)
+    def train_model(self, model, x_train, y_train):
+        # Train the model with the provided data
         model.fit(x_train, y_train)
 
-    def eval_model(self, model, num_boards):
-        # Evaluates the model against the desired number of boards
-        x_test, y_test = self.get_boards(num_boards)
+    def eval_model(self, model, x_test, y_test):
+        # Evaluates the model with the provided data
         y_pred = model.predict(x_test)
         return self.calc_accuracy(y_test, y_pred)
 
@@ -63,12 +51,15 @@ class SudokuRandomForest:
 
 if __name__ == "__main__":
     srf = SudokuRandomForest()
-    # model = srf.get_model(n_estimators=250)
-    # start = time.time()
-    # srf.train_model(model, 50000)
-    # end = time.time()
+    model = srf.get_model(n_estimators=100)
+    x, y = srf.get_boards(50000, 'sudoku-3m.csv')
+    x_train, y_train = x[:40000], y[:40000]
+    x_test, y_test = x[40000:], y[40000:]
+    start = time.time()
+    srf.train_model(model, x_train, y_train)
+    end = time.time()
     # srf.save_model(model, "sudokurandomforest_250trees_50000boards.joblib")
-    # print(f"Accuracy after attempting 50000 puzzles ({end - start} sec) with 250 trees: {srf.eval_model(model, 1000)}")
+    print(f"Accuracy after attempting 10000 puzzles ({end - start} sec) with 250 trees: {srf.eval_model(model, x_test, y_test)}")
 
 
     # for ests in [150, 175, 200, 225, 250]:
@@ -78,8 +69,8 @@ if __name__ == "__main__":
     #     end = time.time()
     #     print(f"Accuracy after attempting 10000 puzzles ({end - start} sec) with {ests} trees: {srf.eval_model(model, 1000)}")
 
-    unsolved, _ = srf.get_boards(5000)
-    unsolved[unsolved != None] = 1
-    unsolved[unsolved == None] = 0
-    sum = np.sum(unsolved)
-    print(sum / (81 * 5000))
+    # unsolved, _ = srf.get_boards(num_boards=100000, filename='sudoku-3m.csv')
+    # unsolved[unsolved != None] = 1
+    # unsolved[unsolved == None] = 0
+    # sum = np.sum(unsolved)
+    # print(sum / (81 * 100000))

@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="526763a9-42e7-476b-a9da-0ce736a08c6a" name="Changes" comment="Modified some SudokuBoard code and started programming the random forest model">
-      <change afterPath="$PROJECT_DIR$/SudokuFCNN.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SudokuCNN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SudokuBoard.py" beforeDir="false" afterPath="$PROJECT_DIR$/SudokuBoard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SudokuFCNN.py" beforeDir="false" afterPath="$PROJECT_DIR$/SudokuFCNN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SudokuRandomForest.py" beforeDir="false" afterPath="$PROJECT_DIR$/SudokuRandomForest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,12 +32,12 @@
     &quot;assignee&quot;: &quot;jd7jez&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/jd7jez/ProjectSudoku.git",
-    "accountId": "6310f584-6105-4f5e-ab39-00d721d2e3cd"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/jd7jez/ProjectSudoku.git&quot;,
+    &quot;accountId&quot;: &quot;6310f584-6105-4f5e-ab39-00d721d2e3cd&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -46,22 +47,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.SudokuBoard.executor": "Run",
-    "Python.SudokuFCNN.executor": "Run",
-    "Python.SudokuRandomForest.executor": "Run",
-    "Python.main.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.SudokuBoard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.SudokuCNN.executor&quot;: &quot;Run&quot;,
+    &quot;Python.SudokuFCNN.executor&quot;: &quot;Run&quot;,
+    &quot;Python.SudokuRandomForest.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\rstre\PycharmProjects\ProjectSudoku" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.SudokuFCNN">
+  <component name="RunManager" selected="Python.SudokuCNN">
     <configuration name="SudokuBoard" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ProjectSudoku" />
       <option name="ENV_FILES" value="" />
@@ -76,6 +78,28 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/SudokuBoard.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="SudokuCNN" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ProjectSudoku" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/SudokuCNN.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -152,6 +176,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.SudokuCNN" />
         <item itemvalue="Python.SudokuFCNN" />
         <item itemvalue="Python.SudokuRandomForest" />
         <item itemvalue="Python.SudokuBoard" />
