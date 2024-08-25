@@ -37,6 +37,23 @@ class SudokuBoard:
         # Return the unsolved and solved board pairs
         return unsolved_boards, solved_boards
 
+    def generate_numpy_boards(self, num_boards=100, filename=None):
+        unsolved, solved = self.generate_board_pairs(num_boards=num_boards, filename=filename)
+        unsolved, solved = np.array(unsolved).reshape((num_boards, 81)), np.array(solved).reshape((num_boards, 81))
+        return unsolved, solved
+
+    # I am one-hot encoding the sudoku board data because the values are basically just categorical
+    # I don't want the model to interpret any sort of quantitative relationship between numbers, strictly ordinal
+    def one_hot_encode(self, boards):
+        # Create numpy array of proper shape
+        enc_boards = np.zeros((boards.shape[0], 81, 9))
+        # One hot encode the values
+        for i, board in enumerate(boards):
+            for j, box in enumerate(board):
+                if box != 0:
+                    enc_boards[i][j][box - 1] = 1
+        # Return one hot encoded boards
+        return enc_boards
 
     def num_is_valid(self, board, row, col, num):
         # If the value in this space is not None then return False

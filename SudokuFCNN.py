@@ -30,7 +30,7 @@ class SudokuFCNN:
         # Return the collection of solved and unsolved converted to tensors
         return x_train, y_train, x_test, y_test
 
-    # I am one-hot encoding the sudoku boar data because the values are basically just categorical
+    # I am one-hot encoding the sudoku board data because the values are basically just categorical
     # I don't want the model to interpret any sort of quantitative relationship between numbers, strictly ordinal
     def one_hot_encode(self, boards):
         # Create numpy array of proper shape

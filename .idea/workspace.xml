@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="526763a9-42e7-476b-a9da-0ce736a08c6a" name="Changes" comment="Modified some SudokuBoard code and started programming the random forest model">
-      <change afterPath="$PROJECT_DIR$/SudokuCNN.py" afterDir="false" />
+    <list default="true" id="526763a9-42e7-476b-a9da-0ce736a08c6a" name="Changes" comment="Changed SudokuBoard to either read data from files or generate boards. Finished Random Forest, Fully Connected Neural Network, and Convolutional Neural Network models.">
+      <change afterPath="$PROJECT_DIR$/SudokuLSTM.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SudokuBoard.py" beforeDir="false" afterPath="$PROJECT_DIR$/SudokuBoard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SudokuFCNN.py" beforeDir="false" afterPath="$PROJECT_DIR$/SudokuFCNN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SudokuRandomForest.py" beforeDir="false" afterPath="$PROJECT_DIR$/SudokuRandomForest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,23 +46,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.SudokuBoard.executor&quot;: &quot;Run&quot;,
-    &quot;Python.SudokuCNN.executor&quot;: &quot;Run&quot;,
-    &quot;Python.SudokuFCNN.executor&quot;: &quot;Run&quot;,
-    &quot;Python.SudokuRandomForest.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.SudokuBoard.executor": "Run",
+    "Python.SudokuCNN.executor": "Run",
+    "Python.SudokuFCNN.executor": "Run",
+    "Python.SudokuLSTM.executor": "Run",
+    "Python.SudokuRandomForest.executor": "Run",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\rstre\PycharmProjects\ProjectSudoku" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.SudokuCNN">
+  <component name="RunManager" selected="Python.SudokuLSTM">
     <configuration name="SudokuBoard" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ProjectSudoku" />
       <option name="ENV_FILES" value="" />
@@ -130,6 +130,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="SudokuLSTM" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ProjectSudoku" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/SudokuLSTM.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="SudokuRandomForest" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ProjectSudoku" />
       <option name="ENV_FILES" value="" />
@@ -176,6 +198,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.SudokuLSTM" />
         <item itemvalue="Python.SudokuCNN" />
         <item itemvalue="Python.SudokuFCNN" />
         <item itemvalue="Python.SudokuRandomForest" />
@@ -215,7 +238,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722056667288</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Changed SudokuBoard to either read data from files or generate boards. Finished Random Forest, Fully Connected Neural Network, and Convolutional Neural Network models.">
+      <option name="closed" value="true" />
+      <created>1722651573606</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1722651573606</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -244,7 +275,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Playing around with Sudoku library" />
     <MESSAGE value="Modified some SudokuBoard code and started programming the random forest model" />
-    <option name="LAST_COMMIT_MESSAGE" value="Modified some SudokuBoard code and started programming the random forest model" />
+    <MESSAGE value="Changed SudokuBoard to either read data from files or generate boards. Finished Random Forest, Fully Connected Neural Network, and Convolutional Neural Network models." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed SudokuBoard to either read data from files or generate boards. Finished Random Forest, Fully Connected Neural Network, and Convolutional Neural Network models." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
