@@ -5,6 +5,7 @@ import random
 import time
 import csv
 import numpy as np
+import copy
 
 
 class SudokuBoard:
@@ -30,7 +31,7 @@ class SudokuBoard:
         solved_boards = []
         for _ in range(num_boards):
             # Generate a complete board then remove numbers to make a solvable puzzle with one unique solution
-            unsolved, solved = self.make_puzzle(difficulty=difficulty, board=solved)
+            unsolved, solved = self.make_puzzle(difficulty=difficulty)
             unsolved_boards.append(unsolved)
             solved_boards.append(solved)
 
@@ -130,8 +131,9 @@ class SudokuBoard:
         if board == None:
             board = self.generate_board()
 
-        # Copy the board
-        solved = board.copy()
+        # Copy the board to a solved and unsolved version to mitigate reference issues
+        unsolved = copy.deepcopy(board)
+        solved = copy.deepcopy(board)
 
         # If no given difficulty then get a random one
         if difficulty == None:
@@ -146,16 +148,16 @@ class SudokuBoard:
             if difficulty == 0:
                 break
             row, col = cell
-            val = board[row][col]
-            board[row][col] = None
-            if self.count_solutions(board) == 1:
+            val = unsolved[row][col]
+            unsolved[row][col] = None
+            if self.count_solutions(unsolved) == 1:
                 difficulty -= 1
             else:
-                board[row][col] = val
+                unsolved[row][col] = val
 
         # If difficulty has reached 0 then all removals have happened and return, otherwise error
         if difficulty == 0:
-            return solved, board
+            return unsolved, solved
         else:
             print("Board difficulty not possible for board, using new board")
             return self.make_puzzle(difficulty=difficulty)
