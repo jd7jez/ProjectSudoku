@@ -135,7 +135,7 @@ class SudokuGame:
             if event.type == pygame.KEYDOWN:
                 if self.selected_cell:
                     row, col = self.selected_cell
-                    if event.key in range(pygame.K_0, pygame.K_9):  # Keys 1-9
+                    if event.key in range(pygame.K_0, pygame.K_9 + 1):  # Keys 1-9
                         self.makeMove(row, col, event.key - pygame.K_0)
 
         self.screen.fill((255, 255, 255))  # Clear screen
