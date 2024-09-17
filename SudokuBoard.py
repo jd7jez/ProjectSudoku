@@ -1,6 +1,4 @@
-import sys
 
-from sudoku import Sudoku
 import random
 import time
 import csv
