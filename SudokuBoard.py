@@ -29,14 +29,16 @@ class SudokuBoard:
               f"and is not recommended when loading in more than 10 boards.")
         unsolved_boards = []
         solved_boards = []
+        missing = []
         for _ in range(num_boards):
             # Generate a complete board then remove numbers to make a solvable puzzle with one unique solution
-            unsolved, solved = self.make_puzzle(difficulty=difficulty)
+            unsolved, solved, curr_missing = self.make_puzzle(difficulty=difficulty)
             unsolved_boards.append(unsolved)
             solved_boards.append(solved)
+            missing.append(curr_missing)
 
         # Return the unsolved and solved board pairs
-        return unsolved_boards, solved_boards
+        return unsolved_boards, solved_boards, missing
 
     def generate_numpy_boards(self, num_boards=100, filename=None):
         unsolved, solved = self.generate_board_pairs(num_boards=num_boards, filename=filename)
@@ -138,6 +140,7 @@ class SudokuBoard:
         # If no given difficulty then get a random one
         if difficulty == None:
             difficulty = random.randint(50, 60)
+        missing = difficulty
 
         # Get a list of all possible cells and then randomize the order
         cells = [(row, col) for col in range(9) for row in range(9)]
@@ -157,7 +160,7 @@ class SudokuBoard:
 
         # If difficulty has reached 0 then all removals have happened and return, otherwise error
         if difficulty == 0:
-            return unsolved, solved
+            return unsolved, solved, missing
         else:
             print("Board difficulty not possible for board, using new board")
             return self.make_puzzle(difficulty=difficulty)
@@ -176,18 +179,34 @@ class SudokuBoard:
     def read_board_file(self, filename, numlines=10000):
         unsolved_boards = []
         solved_boards = []
+        missing = []
         with open(filename, mode='r', newline='') as file:
             reader = csv.reader(file)
             for i, row in enumerate(reader):
-                if i == 0:
-                    continue
                 if i > numlines:
                     break
-                unsolved_string = row[1]
-                solved_string = row[2]
+                unsolved_string = row[0]
+                solved_string = row[1]
+                missing_string = row[2]
                 unsolved_boards.append(self.string_to_board(unsolved_string))
                 solved_boards.append(self.string_to_board(solved_string))
-        return unsolved_boards, solved_boards
+                missing.append(int(missing_string))
+        return unsolved_boards, solved_boards, missing
+
+    def write_board_file(self, unsolved_boards, solved_boards, filename):
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            for unsolved, solved in zip(unsolved_boards, solved_boards):
+                missing = 0
+                for row in unsolved:
+                    for val in row:
+                        if val == None:
+                            missing += 1
+                unsolved_str = self.board_to_string(unsolved)
+                solved_str = self.board_to_string(solved)
+
+                board_data = [unsolved_str, solved_str, str(missing)]
+                writer.writerow(board_data)
 
     def string_to_board(self, board_string):
         board = [[] for _ in range(9)]
@@ -199,9 +218,22 @@ class SudokuBoard:
                 board[row].append(int(char))
         return board
 
+    def board_to_string(self, board):
+        board_string = ""
+        for row in board:
+            for val in row:
+                cell = str(val) if val != None else '.'
+                board_string += cell
+        return board_string
+
 
 if __name__ == "__main__":
+    start = time.time()
     sb = SudokuBoard()
+    unsolved, solved, missing = sb.generate_board_pairs(num_boards=10000, difficulty=1)
+    sb.write_board_file(unsolved, solved, 'sudoku-10k-1missing.csv')
+    end = time.time()
+    print(f"Total Time to generate and save 10000 boards:{end - start}")
 
     # sb.read_board_file('sudoku-3m.csv')
     # unsolved, solved = sb.generate_board_pairs(num_boards=3, filename='sudoku-3m.csv',)
@@ -209,7 +241,7 @@ if __name__ == "__main__":
     # print(solved[0][0])
     # print(type(solved[0][0]))
 
-    start = time.time()
-    unsolved, solved = sb.generate_board_pairs(num_boards=100000, filename='sudoku-3m.csv')
-    end = time.time()
-    print(f"Total Time to read 1000 boards:{end-start}")
+    # start = time.time()
+    # unsolved, solved = sb.generate_board_pairs(num_boards=100000, filename='sudoku-3m.csv')
+    # end = time.time()
+    # print(f"Total Time to read 1000 boards:{end-start}")

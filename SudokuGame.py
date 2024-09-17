@@ -16,8 +16,9 @@ class SudokuGame:
     # 2: Incorrect Guess
     # 3: Invalid Guess that defies rules
 
-    def __init__(self, unsolved=None, solved=None, preload=False, num_boards=10, visualize=False, help=False, reward=False, rewards=None):
+    def __init__(self, unsolved=None, solved=None, preload=False, filename='sudoku-3m-kaggle.csv', num_boards=10, visualize=False, help=False, reward=False, rewards=None, verbose=1):
         self.sb = SudokuBoard()
+        self.verbose = verbose
         self.unsolved = unsolved
         self.solved = solved
         self.current = unsolved.copy() if unsolved != None else None
@@ -36,7 +37,7 @@ class SudokuGame:
             self.validate_rewards(rewards)
 
         if self.preload:
-            self.loaded_unsolved, self.loaded_solved = self.sb.generate_board_pairs(num_boards=self.num_boards, filename='sudoku-3m.csv')
+            self.loaded_unsolved, self.loaded_solved, self.loaded_difficulties = self.sb.generate_board_pairs(num_boards=self.num_boards, filename=filename)
 
         # Constants
         self.WIDTH, self.HEIGHT = 750, 450  # Size of the window
@@ -50,17 +51,17 @@ class SudokuGame:
 
         self.screen = None
         self.selected_cell = None
-        print("Created Sudoku Game")
+        self.printv("Created Sudoku Game")
 
         if self.visualize:
-            print("Visualizing and playing SudokuGame")
+            self.printv("Visualizing and playing SudokuGame")
             self.play()
 
     def validate_rewards(self, rewards):
         if isinstance(rewards, list) and (isinstance(val, float) for val in rewards) and len(rewards) == 4:
             self.rewards = rewards
         else:
-            print("Invalid rewards given, cannot configure rewards")
+            self.printv("Invalid rewards given, cannot configure rewards")
             self.reward = False
 
     def play(self):
@@ -218,7 +219,7 @@ class SudokuGame:
             solved_board = copy.deepcopy(solved_list[0])
 
         if unsolved_board == None or solved_board == None:
-            print("Provided an unsolved or solved board without the counterpart."
+            self.printv("Provided an unsolved or solved board without the counterpart."
                   "You must set the game board with both the unsolved and solved boards."
                   "Setting board failed.")
             return
@@ -228,21 +229,21 @@ class SudokuGame:
         self.current = copy.deepcopy(unsolved_board)
 
     def makeMove(self, row, col, val):
-        print("Making move")
+        self.printv("Making move")
         if self.unsolved == None or self.solved == None or self.current == None:
-            print("This Sudoku Game does not currently have the boards properly configured."
+            self.printv("This Sudoku Game does not currently have the boards properly configured."
                   "Call setBoard to reset the boards.")
             return 0, 0
 
         if self.unsolved[row][col] != None:
-            print("Cannot perform a move on a square that was given.")
+            self.printv("Cannot perform a move on a square that was given.")
             if self.reward:
                 return self.rewards[3], 3
             else:
                 return 0, 0
 
         if val < 0 or val > 9:
-            print("The value guessed must be between 0 and 9 inclusive")
+            self.printv("The value guessed must be between 0 and 9 inclusive")
             return self.rewards[3], 3
 
         self.prev_states.append((row, col, self.current[row][col]))
@@ -258,14 +259,14 @@ class SudokuGame:
                     if self.current == self.solved:
                         return self.rewards[1], 1
                     else:
-                        return self.reward[0], 0
+                        return self.rewards[0], 0
                 else:
                     return self.rewards[2], 2
 
     def undo_move(self):
-        print("undoing move")
+        self.printv("undoing move")
         if len(self.prev_states) == 0:
-            print("No last move to undo")
+            self.printv("No last move to undo")
             return
 
         row, col, val = self.prev_states.pop(-1)
@@ -291,6 +292,10 @@ class SudokuGame:
 
     def printCurrentBoard(self):
         self.sb.print_board(self.current)
+
+    def printv(self, text):
+        if self.verbose:
+            print(text)
 
 if __name__ == "__main__":
     sg = SudokuGame(preload=True, visualize=True)
