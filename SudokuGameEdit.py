@@ -165,7 +165,7 @@ class SudokuGame:
         title_text = title_font.render("Sudoku", True, self.LINE_COLOR)
         screen_width, screen_height = self.screen.get_size()
         title_rect = title_text.get_rect(center=(screen_width // 2, 100))
-        self.screen.blit(title_text, title_rect)
+        self.screen.blit(title_text, title_rect) #plz
 
         box_width = 200
         box_height = 70
