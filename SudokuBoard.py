@@ -47,12 +47,14 @@ class SudokuBoard:
     # I don't want the model to interpret any sort of quantitative relationship between numbers, strictly ordinal
     def one_hot_encode(self, boards):
         # Create numpy array of proper shape
-        enc_boards = np.zeros((boards.shape[0], 81, 9))
+        enc_boards = np.zeros((boards.shape[0], 81, 10))
         # One hot encode the values
         for i, board in enumerate(boards):
-            for j, box in enumerate(board):
-                if box != 0:
-                    enc_boards[i][j][box - 1] = 1
+            for j, val in enumerate(board):
+                if val != None:
+                    enc_boards[i][j][val] = 1
+                else:
+                    enc_boards[i][j][0] = 1
         # Return one hot encoded boards
         return enc_boards
 
@@ -228,8 +230,8 @@ class SudokuBoard:
 if __name__ == "__main__":
     start = time.time()
     sb = SudokuBoard()
-    unsolved, solved, missing = sb.generate_board_pairs(num_boards=10000, difficulty=1)
-    sb.write_board_file(unsolved, solved, 'sudoku-10k-1missing.csv')
+    unsolved, solved, missing = sb.generate_board_pairs(num_boards=10000, difficulty=50)
+    sb.write_board_file(unsolved, solved, 'sudoku-10k-50missing.csv')
     end = time.time()
     print(f"Total Time to generate and save 10000 boards:{end - start}")
 

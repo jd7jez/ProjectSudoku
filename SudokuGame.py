@@ -252,6 +252,9 @@ class SudokuGame:
             self.current[row][col] = None
             if self.reward:
                 return self.rewards[2], 2
+        elif self.current[row][col] == val:
+            if self.reward:
+                return self.rewards[2], 2
         else:
             self.current[row][col] = val
             if self.reward:
