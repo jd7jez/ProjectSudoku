@@ -85,12 +85,12 @@ class SudokuDQN:
                     game.undo_move()
                 board = sb.one_hot_encode(np.reshape(game.get_current(), (1, 81)))
 
+                if self.memory.memory_size > batch_size:
+                    self.replay(batch_size)
+
                 if done:
                     print(f"SUCCESSFULLY SOLVED BOARD {n + 1}/{num_boards} finished in {t + 1} steps with total reward {total_reward}")
                     break
-
-                if self.memory.memory_size > batch_size:
-                    self.replay(batch_size)
             self.reward_history.append(total_reward)
             self.steps_history.append(steps)
 
@@ -98,8 +98,8 @@ class SudokuDQN:
             print(f"Finished training on board {n + 1} in {end - start} seconds with a reward of {total_reward}")
 
             if (n + 1) % 50 == 0:
-                self.save_model(f"sudoku-dqn1.1-{n+1}.h5")
-                self.save_history(f"dqn-history1.1-{n+1}ep.txt")
+                self.save_model(f"sudoku-dqn1.1-lr{self.learning_rate}-{n+1}.h5")
+                self.save_history(f"dqn-history1.1-lr{self.learning_rate}-{n+1}ep.txt")
 
     def get_valid_actions(self, board):
         valid_actions = np.ones((self.action_size))
@@ -162,7 +162,6 @@ class SudokuDQN:
         plt.show()
 
 if __name__ == "__main__":
-    model = SudokuDQN(epsilon_decay=0.995, gamma=0)
-    model.train(filename='sudoku-10k-1missing.csv', num_boards=10000)
-    model.plot_reward_history()
-    model.plot_steps_history()
+    for lr in [0.0001, 0.00005, 0.00001]:
+        model = SudokuDQN(epsilon_decay=0.995, gamma=0, learning_rate=lr)
+        model.train(filename='sudoku-10k-1missing.csv', num_boards=1000)
