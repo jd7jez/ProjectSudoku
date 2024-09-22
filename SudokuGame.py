@@ -82,7 +82,7 @@ class SudokuGame:
         self.prev_states = []
 
     def makeMove(self, row, col, val):
-        self.printv("Making move")
+        self.printv(f"Making move: {val} -> ({row}, {col})")
         if self.unsolved == None or self.solved == None or self.current == None:
             self.printv("This Sudoku Game does not currently have the boards properly configured."
                   "Call setBoard to reset the boards.")
@@ -129,17 +129,17 @@ class SudokuGame:
         self.current[row][col] = val
 
     def reset_board(self):
-        self.current = self.unsolved
+        self.current = copy.deepcopy(self.unsolved)
         self.prev_states = []
 
     def get_unsolved(self):
-        return copy.deepcopy(self.unsolved)
+        return copy.deepcopy(self.unsolved) if self.unsolved != None else None
 
     def get_current(self):
         return copy.deepcopy(self.current) if self.current != None else None
 
     def get_solved(self):
-        return copy.deepcopy(self.solved)
+        return copy.deepcopy(self.solved) if self.solved != None else None
 
     def get_rewards(self):
         return copy.deepcopy(self.rewards)
@@ -155,4 +155,4 @@ class SudokuGame:
             print(text)
 
 if __name__ == "__main__":
-    sg = SudokuGame(preload=True, visualize=True)
+    sg = SudokuGame(preload=True, visualize=True, help=True)

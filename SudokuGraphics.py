@@ -21,8 +21,11 @@ class SudokuGraphics:
 
         # Colors
         self.BLACK = (0, 0, 0)
+        self.GRAY = (200, 200, 200)
         self.WHITE = (255, 255, 255)
         self.HIGHLIGHT_COLOR = (173, 216, 230)
+        self.GREEN = (0, 128, 0)
+        self.RED = (179, 0, 0)
 
         pygame.init()
 
@@ -30,13 +33,15 @@ class SudokuGraphics:
         self.buttons = dict()
         self.create_buttons()
         # Cell metadata is a (9,9) python list where each element is the metadata of the corresponding cell
-        # The format is: [coordinates, top_left_corner, cell_rect, cell_color, num_color]
+        # The format is: [coordinates, top_left_corner, cell_rect, cell_color, num_color, value, given]
         # 0 - coordinates - what the position of this cell is in the format (row, col)
         # 1 - top_left_corner - defines where the top left corner of the cell is with format (x, y)
         # 2 - cell_rect - pygame rectangle object that represents the area of the cell
         # 3 - cell_color - the color the cell should be of format (r, g, b)
-        # 3 - num_color - the color the number should be of format (r, g, b)
-        self.cell_md = [[[(row, col), (x, y), pygame.Rect(x, y, self.CELL_SIZE, self.CELL_SIZE), self.WHITE, self.BLACK]
+        # 4 - num_color - the color the number should be of format (r, g, b)
+        # 5 - value - the number value in this cell
+        # 6 - given - whether the cell was given or not, of the format True or False (True meaning it was given)
+        self.cell_md = [[[(row, col), (x, y), pygame.Rect(x, y, self.CELL_SIZE, self.CELL_SIZE), self.WHITE, self.BLACK, None, False]
                         for col in range(9) for x, y in [self.get_cell_top_left(row, col)]] for row in range(9)]
 
         # Set up the display
@@ -64,17 +69,23 @@ class SudokuGraphics:
         reset_button_text_rect = reset_button_text.get_rect(center=((500 + 700) // 2, (140 + 190) // 2))
         self.buttons['reset'] = [reset_button_rect, reset_button_text, reset_button_text_rect]
 
-        # Draw undo button
+        # Create undo button
         undo_button_rect = pygame.Rect(500, 200, 200, 50)
         undo_button_text = font.render("Undo", True, self.BLACK)
         undo_button_text_rect = undo_button_text.get_rect(center=((500 + 700) // 2, (200 + 250) // 2))
         self.buttons['undo'] = [undo_button_rect, undo_button_text, undo_button_text_rect]
 
-        # Draw new board button
+        # Create new board button
         new_button_rect = pygame.Rect(500, 260, 200, 50)
         new_button_text = font.render("New Game", True, self.BLACK)
         new_button_text_rect = new_button_text.get_rect(center=((500 + 700) // 2, (260 + 310) // 2))
         self.buttons['new'] = [new_button_rect, new_button_text, new_button_text_rect]
+
+        # Create toggle help button
+        help_button_rect = pygame.Rect(500, 50, 200, 50)
+        help_button_text = font.render("Toggle Help", True, self.BLACK)
+        help_button_text_rect = help_button_text.get_rect(center=((500 + 700) // 2, (50 + 100) // 2))
+        self.buttons['help'] = [help_button_rect, help_button_text, help_button_text_rect]
 
     def start(self):
         while True:
@@ -97,6 +108,7 @@ class SudokuGraphics:
                 pos = pygame.mouse.get_pos()
                 if self.buttons['start'][0].collidepoint(pos):
                     self.game.setBoard()
+                    self.sync_board(True)
 
     def winScreen(self):
         for event in pygame.event.get():
@@ -115,7 +127,7 @@ class SudokuGraphics:
     def playWithBoard(self):
         self.screen.fill((0, 0, 0))  # Clear screen
         self.draw_buttons()
-        self.draw_grid_new()
+        self.draw_grid()
         self.draw_numbers()
 
         pygame.display.flip()
@@ -131,16 +143,23 @@ class SudokuGraphics:
                 else:
                     if self.buttons['reset'][0].collidepoint((x, y)):
                         self.game.reset_board()
+                        self.sync_board()
                     if self.buttons['undo'][0].collidepoint((x, y)):
                         self.game.undo_move()
+                        self.sync_board()
                     if self.buttons['new'][0].collidepoint((x, y)):
                         self.game.setBoard()
+                        self.sync_board(True)
+                    if self.buttons['help'][0].collidepoint((x, y)):
+                        self.toggle_help()
+                        self.sync_board()
 
             if event.type == pygame.KEYDOWN:
                 if self.selected_cell:
                     row, col = self.selected_cell
                     if event.key in range(pygame.K_0, pygame.K_9 + 1):  # Keys 1-9
                         self.game.makeMove(row, col, event.key - pygame.K_0)
+                        self.sync_board()
 
     def draw_start_screen(self):
         self.screen.fill((255, 255, 255))  # Clear screen
@@ -167,14 +186,7 @@ class SudokuGraphics:
         self.screen.blit(text1, (144, 212))
         self.screen.blit(text2, (144, 150))
 
-    # Function to draw the grid
     def draw_grid(self):
-        for i in range(self.ROWS + 1):
-            line_width = 1 if i % 3 != 0 else 3
-            pygame.draw.line(self.screen, self.BLACK, (i * self.CELL_SIZE, 0), (i * self.CELL_SIZE, self.BOARD_HEIGHT), line_width)
-            pygame.draw.line(self.screen, self.BLACK, (0, i * self.CELL_SIZE), (self.BOARD_WIDTH, i * self.CELL_SIZE), line_width)
-
-    def draw_grid_new(self):
         for row in self.cell_md:
             for md in row:
                 rect = md[2]
@@ -203,11 +215,9 @@ class SudokuGraphics:
         pygame.draw.rect(self.screen, self.WHITE, self.buttons['new'][0])
         self.screen.blit(self.buttons['new'][1], self.buttons['new'][2])
 
-    # Function to highlight a cell
-    def highlight_cell(self):
-        if self.selected_cell:
-            row, col = self.selected_cell
-            pygame.draw.rect(self.screen, self.HIGHLIGHT_COLOR, (col * self.CELL_SIZE, row * self.CELL_SIZE, self.CELL_SIZE, self.CELL_SIZE))
+        # Draw toggle help button
+        pygame.draw.rect(self.screen, self.WHITE, self.buttons['help'][0])
+        self.screen.blit(self.buttons['help'][1], self.buttons['help'][2])
 
     def click_cell(self, x, y):
         for row in self.cell_md:
@@ -217,14 +227,15 @@ class SudokuGraphics:
                     row, col = md[0]
                     if self.selected_cell:
                         self.cell_md[self.selected_cell[0]][self.selected_cell[1]][3] = self.WHITE
-                        if self.selected_cell != (row, col):
+                        if self.selected_cell != (row, col) and not self.cell_md[row][col][6]:
                             self.selected_cell = (row, col)
                             self.cell_md[row][col][3] = self.HIGHLIGHT_COLOR
                         else:
                             self.selected_cell = None
                     else:
-                        self.selected_cell = (row, col)
-                        self.cell_md[row][col][3] = self.HIGHLIGHT_COLOR
+                        if not self.cell_md[row][col][6]:
+                            self.selected_cell = (row, col)
+                            self.cell_md[row][col][3] = self.HIGHLIGHT_COLOR
                     break
 
 
@@ -232,12 +243,37 @@ class SudokuGraphics:
     # Function to draw numbers (replace with actual Sudoku board data)
     def draw_numbers(self):
         font = pygame.font.Font(None, 36)
-        board = self.game.get_current()
         for row in range(self.ROWS):
             for col in range(self.COLS):
-                if board[row][col] != None:
-                    md = self.cell_md[row][col]
+                md = self.cell_md[row][col]
+                if md[5] != None:
                     x, y = md[1]
                     num_color = md[4]
-                    text = font.render(str(board[row][col]), True, num_color)
-                    self.screen.blit(text, (x + 17, y + 13))
+                    text = font.render(str(md[5]), True, num_color)
+                    text_rect = text.get_rect(center=(x + self.CELL_SIZE // 2, y + self.CELL_SIZE // 2))
+                    self.screen.blit(text, text_rect)
+
+    def sync_board(self, fresh=False):
+        unsolved_board = self.game.get_unsolved()
+        solved_board = self.game.get_solved()
+        current_board = self.game.get_current()
+        for row in range(self.ROWS):
+            for col in range(self.COLS):
+                self.cell_md[row][col][5] = current_board[row][col]
+                if fresh:
+                    if unsolved_board[row][col] != None:
+                        self.cell_md[row][col][3] = self.GRAY
+                        self.cell_md[row][col][6] = True
+                    else:
+                        self.cell_md[row][col][3] = self.WHITE
+                        self.cell_md[row][col][6] = False
+                self.cell_md[row][col][4] = self.BLACK
+                if self.help:
+                    if unsolved_board[row][col] == None and current_board[row][col] != None:
+                        if current_board[row][col] == solved_board[row][col]:
+                            self.cell_md[row][col][4] = self.GREEN
+                        else:
+                            self.cell_md[row][col][4] = self.RED
+
+    def toggle_help(self):
+        self.help = not self.help
