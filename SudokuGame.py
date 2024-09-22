@@ -5,12 +5,6 @@ import sys
 import copy
 
 class SudokuGame:
-    # Color scheme:
-    # 0: Given, gray
-    # 1: Open/Guessed, white
-    # 2: Correct, green
-    # 3: Wrong, red
-
     # Reward Scheme, by index, this is also the same for the move codes:
     # 0: Correct Guess
     # 1: Correct Guess that finishes board
@@ -85,6 +79,7 @@ class SudokuGame:
         self.unsolved = unsolved_board
         self.solved = solved_board
         self.current = copy.deepcopy(unsolved_board)
+        self.prev_states = []
 
     def makeMove(self, row, col, val):
         self.printv("Making move")
@@ -135,6 +130,7 @@ class SudokuGame:
 
     def reset_board(self):
         self.current = self.unsolved
+        self.prev_states = []
 
     def get_unsolved(self):
         return copy.deepcopy(self.unsolved)
