@@ -13,7 +13,7 @@ from PrioritizedMemory import PrioritizedMemory
 
 class SudokuDQN:
 
-    def __init__(self, gamma=0.95, epsilon=1.0, epsilon_decay=0.995, learning_rate=0.001, rewards=[500, 1000, -500, -10000]):
+    def __init__(self, gamma=0.95, epsilon=1.0, epsilon_decay=0.995, learning_rate=0.001, rewards=[5, 10, -5, -100]):
         self.state_size = (9, 9)
         self.actions = [(row, col, val) for row in range(9) for col in range(9) for val in range(1, 10)]
         self.action_size = 81 * 9
@@ -87,17 +87,6 @@ class SudokuDQN:
 
         return np.sum(errors) / batch_size
 
-    def get_actual_rewards_mask(self, board, solved):
-        rewards = np.zeros((1, self.action_size))
-        for y, row in enumerate(board):
-            for x, val in enumerate(row):
-                if val == 0:
-                    first_action = (y * 81) + (x * 9)
-                    correct_action = first_action + (solved[y][x] - 1)
-                    for i in range(first_action, first_action+9):
-                        rewards[0][i] = 2 if i != correct_action else 1
-        return rewards
-
     def train(self, filename=None, num_boards=50, batch_size=32, one_hot=False):
         game = SudokuGame(preload=True, filename=filename, num_boards=num_boards, reward=True, rewards=self.rewards, verbose=0)
         sb = SudokuBoard()
@@ -107,12 +96,9 @@ class SudokuDQN:
 
         for n in range(num_boards):
             game.setBoard()
-            valid_actions_mask = self.get_valid_actions(game.get_current())
-            rewards_mask = self.get_actual_rewards_mask(game.get_current(), game.get_solved())
+            valid_actions_mask = np.array(sb.get_valid_actions(game.get_current()))
+            rewards_mask = np.reshape(sb.get_actual_rewards_mask(game.get_current(), game.get_solved()), (1, self.action_size))
             board = sb.one_hot_encode(np.reshape(game.get_current(), (1, 81))) if one_hot else np.float32(np.reshape(game.get_current(), (1, 9, 9, 1)))
-
-            # Delete these lines later by making all values 0 instead of None in SudokuBoard
-            board = np.nan_to_num(board)
 
             total_reward = 0
             start = time.time()
@@ -126,9 +112,6 @@ class SudokuDQN:
                 reward, code = game.makeMove(row, col, val)
                 next_board = sb.one_hot_encode(np.reshape(game.get_current(), (1, 81))) if one_hot else np.float32(np.reshape(game.get_current(), (1, 9, 9, 1)))
 
-                # Delete this line later by making all values 0 instead of None in SudokuBoard
-                next_board = np.nan_to_num(next_board)
-
                 done = code == 1
                 total_reward += reward
                 self.memory.memorize((board, action_index, reward, next_board, done, rewards_mask))
@@ -139,9 +122,6 @@ class SudokuDQN:
                 else:
                     successes = np.append(successes, 1.0)
                 board = sb.one_hot_encode(np.reshape(game.get_current(), (1, 81))) if one_hot else np.float32(np.reshape(game.get_current(), (1, 9, 9, 1)))
-
-                # Delete this line later by making all values 0 instead of None in SudokuBoard
-                board = np.nan_to_num(board)
 
                 if self.memory.memory_size > batch_size:
                     error = self.replay(batch_size)
@@ -171,18 +151,8 @@ class SudokuDQN:
                 self.epsilon *= self.epsilon_decay
 
             if (n + 1) % 50 == 0:
-                self.save_model(f"sudoku-dqn1.5-lr{self.learning_rate}-{n+1}ep.h5")
-                self.save_history(f"dqn-history1.5-lr{self.learning_rate}-{n+1}ep.txt")
-
-    def get_valid_actions(self, board):
-        valid_actions = np.ones((self.action_size))
-        for y, row in enumerate(board):
-            for x, val in enumerate(row):
-                if val != None:
-                    first_action = (y * 81) + (x * 9)
-                    for i in range(first_action, first_action+9):
-                        valid_actions[i] = 0
-        return valid_actions
+                self.save_model(f"sudoku-dqn1.5.1-lr{self.learning_rate}-{n+1}ep.h5")
+                self.save_history(f"dqn-history1.5.1-lr{self.learning_rate}-{n+1}ep.txt")
 
     def set_model(self, model):
         self.model = model
@@ -268,6 +238,6 @@ class SudokuDQN:
         plt.show()
 
 if __name__ == "__main__":
-    model = SudokuDQN(epsilon=0.0, epsilon_decay=0.995, gamma=0, learning_rate=0.01)
+    model = SudokuDQN(epsilon=0.0, epsilon_decay=0.995, gamma=0, learning_rate=0.0001)
     model.train(filename='sudoku-10k-1missing.csv', num_boards=10000)
     model.plot_history()

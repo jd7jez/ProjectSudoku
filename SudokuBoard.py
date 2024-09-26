@@ -1,4 +1,3 @@
-
 import random
 import time
 import csv
@@ -8,9 +7,9 @@ import copy
 
 class SudokuBoard:
 
-    def __init__(self, width: int=3):
-        self.width = width
-
+    def __init__(self):
+        # Maybe consider making this a utility file with no class object defined in it
+        pass
 
     def generate_board_pairs(self, num_boards=10000, difficulty=None, filename=None):
         # If a filename is given then just read out of that file
@@ -38,10 +37,31 @@ class SudokuBoard:
         # Return the unsolved and solved board pairs
         return unsolved_boards, solved_boards, missing
 
+    def get_valid_actions(self, board):
+        valid_actions = [1 for _ in range(81 * 9)]
+        for y, row in enumerate(board):
+            for x, val in enumerate(row):
+                if val != 0:
+                    first_action = (y * 81) + (x * 9)
+                    for i in range(first_action, first_action+9):
+                        valid_actions[i] = 0
+        return valid_actions
+
+    def get_actual_rewards_mask(self, board, solved):
+        reward_mask = [0 for _ in range(81 * 9)]
+        for y, row in enumerate(board):
+            for x, val in enumerate(row):
+                if val == 0:
+                    first_action = (y * 81) + (x * 9)
+                    correct_action = first_action + (solved[y][x] - 1)
+                    for i in range(first_action, first_action+9):
+                        reward_mask[i] = 2 if i != correct_action else 1
+        return reward_mask
+
     def generate_numpy_boards(self, num_boards=100, filename=None):
-        unsolved, solved = self.generate_board_pairs(num_boards=num_boards, filename=filename)
+        unsolved, solved, missing = self.generate_board_pairs(num_boards=num_boards, filename=filename)
         unsolved, solved = np.array(unsolved).reshape((num_boards, 81)), np.array(solved).reshape((num_boards, 81))
-        return unsolved, solved
+        return unsolved, solved, missing
 
     # I am one-hot encoding the sudoku board data because the values are basically just categorical
     # I don't want the model to interpret any sort of quantitative relationship between numbers, strictly ordinal
@@ -51,7 +71,7 @@ class SudokuBoard:
         # One hot encode the values
         for i, board in enumerate(boards):
             for j, val in enumerate(board):
-                if val != None:
+                if val != 0:
                     enc_boards[i][j][val] = 1
                 else:
                     enc_boards[i][j][0] = 1
@@ -59,8 +79,8 @@ class SudokuBoard:
         return enc_boards
 
     def num_is_valid(self, board, row, col, num):
-        # If the value in this space is not None then return False
-        if board[row][col] != None:
+        # If the value in this space is not zero then return False
+        if board[row][col] != 0:
             return False
 
         # Check if the number exists in the row or column already, return false if it does
@@ -83,7 +103,7 @@ class SudokuBoard:
         # Basically try every possible way of solving the board to see if there is a solution
         for row in range(9):
             for col in range(9):
-                if board[row][col] == None:
+                if board[row][col] == 0:
                     # If this cell has no value in it then try every possible value in random order
                     nums = [val for val in range(1, 10)]
                     random.shuffle(nums)
@@ -95,7 +115,7 @@ class SudokuBoard:
                                 # If the board was solved then this was the right number and return true
                                 return True
                             # Reset the cell to empty because this number did not work
-                            board[row][col] = None
+                            board[row][col] = 0
                     # Return false because there was no solvable board with the current values
                     return False
         # The board is solved already so return true, this is base case
@@ -106,14 +126,14 @@ class SudokuBoard:
         solutions = 0
         for row in range(9):
             for col in range(9):
-                if board[row][col] == None:
+                if board[row][col] == 0:
                     # If the cell has no value in it then try every possible value
                     for num in range(1, 10):
                         if self.num_is_valid(board, row, col, num):
                             # If the number is valid in this position then continue trying to find solutions with this number, add the solutions found to solutions
                             board[row][col] = num
                             solutions += self.count_solutions(board)
-                            board[row][col] = None
+                            board[row][col] = 0
                     # Return the number of solutions because if every value has been tried for this empty cell in every scenario then inherintly all possible solutions have been found
                     return solutions
         # Return 1 because the board is already filled out so only 1 possible solution right now
@@ -121,7 +141,7 @@ class SudokuBoard:
 
     def generate_board(self):
         # Create an empty board and then attempt to solve it which should inherently create a board
-        board = [[None for _ in range(9)] for _ in range(9)]
+        board = [[0 for _ in range(9)] for _ in range(9)]
         if self.board_is_solvable(board):
             return board
         else:
@@ -152,7 +172,7 @@ class SudokuBoard:
                 break
             row, col = cell
             val = unsolved[row][col]
-            unsolved[row][col] = None
+            unsolved[row][col] = 0
             if self.count_solutions(unsolved) == 1:
                 difficulty -= 1
             else:
@@ -200,7 +220,7 @@ class SudokuBoard:
                 missing = 0
                 for row in unsolved:
                     for val in row:
-                        if val == None:
+                        if val == 0:
                             missing += 1
                 unsolved_str = self.board_to_string(unsolved)
                 solved_str = self.board_to_string(solved)
@@ -213,7 +233,7 @@ class SudokuBoard:
         for i, char in enumerate(board_string):
             row = (i // 9)
             if char == '.':
-                board[row].append(None)
+                board[row].append(0)
             else:
                 board[row].append(int(char))
         return board
@@ -222,7 +242,7 @@ class SudokuBoard:
         board_string = ""
         for row in board:
             for val in row:
-                cell = str(val) if val != None else '.'
+                cell = str(val) if val != 0 else '.'
                 board_string += cell
         return board_string
 

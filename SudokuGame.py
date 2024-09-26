@@ -88,7 +88,7 @@ class SudokuGame:
                   "Call setBoard to reset the boards.")
             return 0, 0
 
-        if self.unsolved[row][col] != None:
+        if self.unsolved[row][col] != 0:
             self.printv("Cannot perform a move on a square that was given.")
             if self.reward:
                 return self.rewards[3], 3
@@ -102,7 +102,7 @@ class SudokuGame:
         self.prev_states.append((row, col, self.current[row][col]))
 
         if val == 0:
-            self.current[row][col] = None
+            self.current[row][col] = 0
             if self.reward:
                 return self.rewards[2], 2
         elif self.current[row][col] == val:
@@ -155,4 +155,4 @@ class SudokuGame:
             print(text)
 
 if __name__ == "__main__":
-    sg = SudokuGame(preload=True, visualize=True, help=True)
+    sg = SudokuGame(preload=True, visualize=True)

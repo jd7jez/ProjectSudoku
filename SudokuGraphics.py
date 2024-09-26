@@ -41,7 +41,7 @@ class SudokuGraphics:
         # 4 - num_color - the color the number should be of format (r, g, b)
         # 5 - value - the number value in this cell
         # 6 - given - whether the cell was given or not, of the format True or False (True meaning it was given)
-        self.cell_md = [[[(row, col), (x, y), pygame.Rect(x, y, self.CELL_SIZE, self.CELL_SIZE), self.WHITE, self.BLACK, None, False]
+        self.cell_md = [[[(row, col), (x, y), pygame.Rect(x, y, self.CELL_SIZE, self.CELL_SIZE), self.WHITE, self.BLACK, 0, False]
                         for col in range(9) for x, y in [self.get_cell_top_left(row, col)]] for row in range(9)]
 
         # Set up the display
@@ -246,7 +246,7 @@ class SudokuGraphics:
         for row in range(self.ROWS):
             for col in range(self.COLS):
                 md = self.cell_md[row][col]
-                if md[5] != None:
+                if md[5] != 0:
                     x, y = md[1]
                     num_color = md[4]
                     text = font.render(str(md[5]), True, num_color)
@@ -261,7 +261,7 @@ class SudokuGraphics:
             for col in range(self.COLS):
                 self.cell_md[row][col][5] = current_board[row][col]
                 if fresh:
-                    if unsolved_board[row][col] != None:
+                    if unsolved_board[row][col] != 0:
                         self.cell_md[row][col][3] = self.GRAY
                         self.cell_md[row][col][6] = True
                     else:
@@ -269,7 +269,7 @@ class SudokuGraphics:
                         self.cell_md[row][col][6] = False
                 self.cell_md[row][col][4] = self.BLACK
                 if self.help:
-                    if unsolved_board[row][col] == None and current_board[row][col] != None:
+                    if unsolved_board[row][col] == 0 and current_board[row][col] != 0:
                         if current_board[row][col] == solved_board[row][col]:
                             self.cell_md[row][col][4] = self.GREEN
                         else:
