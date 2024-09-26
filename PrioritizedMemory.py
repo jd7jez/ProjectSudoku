@@ -4,7 +4,7 @@ import numpy as np
 
 class PrioritizedMemory:
 
-    def __init__(self, capacity=1000, alpha=0.6):
+    def __init__(self, capacity=500, alpha=0.6):
         self.capacity = capacity
         self.alpha = alpha
         self.memory = []
@@ -24,6 +24,9 @@ class PrioritizedMemory:
         self.position = (self.position + 1) % self.capacity
 
     def sample(self, batch_size, beta=0.4):
+        if self.memory_size == 0:
+            raise ValueError("Memory is empty, cannot sample an empty memory.")
+
         probs = self.priorities[:self.memory_size] ** self.alpha
         probs /= probs.sum()
 
