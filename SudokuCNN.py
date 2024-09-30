@@ -30,11 +30,12 @@ class SudokuCNN:
 
     def get_model(self, lr=0.001):
         model = Sequential([
-            Conv2D(128, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
             Conv2D(256, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
+            Conv2D(512, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
             Flatten(),
-            Dense(512, activation='relu'),
-            Dense(256, activation='relu'),
+            Dense(1024, activation='relu'),
+            Dense(2048, activation='relu'),
+            Dense(1024, activation='relu'),
             Dense(81*9, activation='linear')
         ])
         # model = Sequential([
@@ -72,14 +73,18 @@ class SudokuCNN:
         # Evaluates the model against the given data
         return self.model.evaluate(self.x_test, self.y_test)
 
-    def save_model(self, name):
+    def save_model(self):
         self.model.save_weights(self.model_name+".h5")
 
+    def load_model(self, filename):
+        self.model.load_weights(filename)
+
 if __name__ == "__main__":
-    model_name = 'sudoku_singlevalplacer_1.6_50ep'
-    scnn = SudokuCNN(model_name=model_name, lr=0.0001)
-    scnn.get_data(10000, 'sudoku-10k-1missing.csv', rewards=[5, 10, -5, -10])
-    scnn.train_model(50, 32, 0.2)
+    model_name = 'sudoku_singlevalplacer_1.6_9ep_3milboards'
+    scnn = SudokuCNN(model_name=model_name, lr=0.00001) # Was 0.0001 for epochs 1-6
+    scnn.load_model(filename='sudoku_singlevalplacer_1.6_6ep_2milboards.h5')
+    scnn.get_data(1000000, 'sudoku-1m-1missing-3.csv', rewards=[5, 10, -5, -10])
+    scnn.train_model(3, 32, 0.2)
     scnn.eval_model()
-    scnn.save_model(f'')
+    scnn.save_model()
 
