@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Conv2D, 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, CSVLogger
 from SudokuBoard import SudokuBoard
-from time import time
+import time
 
 
 def valid_action_mse(y_true, y_pred):
@@ -17,7 +17,7 @@ def valid_action_accuracy(y_true, y_pred):
     mask = y_true[:, 729:]
     y_true = y_true[:, :729]
 
-    tolerance = 0.01
+    tolerance = 2.5
 
     y_correct = tf.abs(y_pred - y_true) < tolerance
     y_correct = tf.cast(y_correct, tf.float32) * mask
@@ -25,6 +25,15 @@ def valid_action_accuracy(y_true, y_pred):
     num_valid_actions = tf.reduce_sum(mask)
     num_correct = tf.reduce_sum(y_correct)
     return num_correct / num_valid_actions
+
+def correct_move_accuracy(y_true, y_pred):
+    mask = y_true[:, 729:]
+    y_true = y_true[:, :729]
+
+    chosen_actions = tf.one_hot(tf.argmax(y_pred * mask, axis=1), depth=729)
+    action_rewards = tf.reduce_sum(chosen_actions * y_true, axis=1)
+
+    return tf.reduce_mean(tf.cast(tf.equal(action_rewards, 10), tf.float32))
 
 class SudokuCNN:
 
@@ -83,7 +92,7 @@ class SudokuCNN:
         #     Dense(81 * 9, activation='softmax'),
         #     Reshape((81, 9))
         # ])
-        model.compile(optimizer=Adam(learning_rate=lr), loss=valid_action_mse, metrics=[valid_action_accuracy])
+        model.compile(optimizer=Adam(learning_rate=lr), loss=valid_action_mse, metrics=[valid_action_accuracy, correct_move_accuracy])
         return model
 
     def train_model(self, epochs=50, batch_size=32, validation_split=0.2):
@@ -106,25 +115,10 @@ class SudokuCNN:
         self.model.load_weights(filename)
 
 if __name__ == "__main__":
-    # model_name = 'sudoku_singlevalplacer_1.61_12ep_4milboards'
-    # scnn = SudokuCNN(model_name=model_name, lr=0.0001) # Was 0.0001 for epochs 1-6 and 10-12 then 0.00001 for epochs 7-9
-    # scnn.load_model(filename='sudoku_singlevalplacer_1.6_9ep_3milboards.h5')
-    # scnn.get_data(1000000, 'sudoku-1m-2missing-1.csv', rewards=[5, 10, -5, -10])
-    # scnn.train_model(3, 32, 0.2)
-    # scnn.eval_model()
-    # scnn.save_model()
-
-    model_name = 'sudoku_beginner_1.8_3ep_1milboards'
-    scnn = SudokuCNN(model_name=model_name, lr=0.0001)
-    scnn.get_data(1000000, 'sudoku-1m-10missing-1.csv', rewards=[10, 10, -10, -10])
-    scnn.train_model(3, 32, 0.2)
-    scnn.eval_model()
-    scnn.save_model()
-
-    model_name = 'sudoku_beginner_1.8_6ep_2milboards'
-    scnn = SudokuCNN(model_name=model_name, lr=0.0001)
-    scnn.load_model(filename='sudoku_beginner_1.8_3ep_1milboards.h5')
-    scnn.get_data(1000000, 'sudoku-1m-10missing-2.csv', rewards=[10, 10, -10, -10])
+    model_name = 'sudoku_genie_1.8_15ep_5milboards_0.0001'
+    scnn = SudokuCNN(model_name=model_name, lr=0.00001) # Was 0.0001 for epochs 1-12
+    scnn.load_model(filename='sudoku_genie_1.8_12ep_4milboards.h5')
+    scnn.get_data(1000000, 'sudoku-1m-kaggle-2.csv', rewards=[10, 10, -10, -10])
     scnn.train_model(3, 32, 0.2)
     scnn.eval_model()
     scnn.save_model()
