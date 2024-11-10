@@ -66,13 +66,28 @@ class SudokuCNN:
     def get_model(self, lr=0.001):
         model = Sequential([
             Conv2D(256, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
+            BatchNormalization(),
             Conv2D(512, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
+            BatchNormalization(),
             Flatten(),
             Dense(1024, activation='relu'),
+            Dropout(0.25),
+            BatchNormalization(),
             Dense(2048, activation='relu'),
+            Dropout(0.25),
+            BatchNormalization(),
             Dense(1024, activation='relu'),
-            Dense(81*9, activation='linear')
+            Dense(81 * 9, activation='linear')
         ])
+        # model = Sequential([
+        #     Conv2D(256, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
+        #     Conv2D(512, (3, 3), activation='relu', input_shape=(9, 9, 1), padding='same'),
+        #     Flatten(),
+        #     Dense(1024, activation='relu'),
+        #     Dense(2048, activation='relu'),
+        #     Dense(1024, activation='relu'),
+        #     Dense(81*9, activation='linear')
+        # ])
         # model = Sequential([
         #     Input(shape=(81, 9)),  # assuming the input is a 9x9 board with a single channel
         #     Reshape((9, 9, 9)),
@@ -115,10 +130,9 @@ class SudokuCNN:
         self.model.load_weights(filename)
 
 if __name__ == "__main__":
-    model_name = 'sudoku_genie_1.8_15ep_5milboards_0.0001'
-    scnn = SudokuCNN(model_name=model_name, lr=0.00001) # Was 0.0001 for epochs 1-12
-    scnn.load_model(filename='sudoku_genie_1.8_12ep_4milboards.h5')
-    scnn.get_data(1000000, 'sudoku-1m-kaggle-2.csv', rewards=[10, 10, -10, -10])
-    scnn.train_model(3, 32, 0.2)
+    model_name = 'sudoku_sage_1.9_10ep_3milboards'
+    scnn = SudokuCNN(model_name=model_name, lr=0.0001)
+    scnn.get_data(3000000, 'sudoku-3m-kaggle.csv', rewards=[10, 10, -10, -10])
+    scnn.train_model(10, 32, 0.2)
     scnn.eval_model()
     scnn.save_model()
