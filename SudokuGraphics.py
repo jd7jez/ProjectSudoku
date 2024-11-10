@@ -26,6 +26,7 @@ class SudokuGraphics:
         self.HIGHLIGHT_COLOR = (173, 216, 230)
         self.GREEN = (0, 128, 0)
         self.RED = (179, 0, 0)
+        self.CYAN = (0, 255, 255)
 
         pygame.init()
 
@@ -41,7 +42,8 @@ class SudokuGraphics:
         # 4 - num_color - the color the number should be of format (r, g, b)
         # 5 - value - the number value in this cell
         # 6 - given - whether the cell was given or not, of the format True or False (True meaning it was given)
-        self.cell_md = [[[(row, col), (x, y), pygame.Rect(x, y, self.CELL_SIZE, self.CELL_SIZE), self.WHITE, self.BLACK, 0, False]
+        # 7 - ai_pred - the prediction value made by the ai, is 0 if no prediction and 1-9 if there is one
+        self.cell_md = [[[(row, col), (x, y), pygame.Rect(x, y, self.CELL_SIZE, self.CELL_SIZE), self.WHITE, self.BLACK, 0, False, 0]
                         for col in range(9) for x, y in [self.get_cell_top_left(row, col)]] for row in range(9)]
 
         # Set up the display
@@ -86,6 +88,12 @@ class SudokuGraphics:
         help_button_text = font.render("Toggle Help", True, self.BLACK)
         help_button_text_rect = help_button_text.get_rect(center=((500 + 700) // 2, (50 + 100) // 2))
         self.buttons['help'] = [help_button_rect, help_button_text, help_button_text_rect]
+
+        # Create AI Move button
+        aimove_button_rect = pygame.Rect(500, 350, 200, 50)
+        aimove_button_text = font.render("AI Move", True, self.BLACK)
+        aimove_button_text_rect = aimove_button_text.get_rect(center=((500 + 700) // 2, (350 + 400) // 2))
+        self.buttons['aimove'] = [aimove_button_rect, aimove_button_text, aimove_button_text_rect]
 
     def start(self):
         while True:
@@ -153,6 +161,9 @@ class SudokuGraphics:
                     if self.buttons['help'][0].collidepoint((x, y)):
                         self.toggle_help()
                         self.sync_board()
+                    if self.buttons['aimove'][0].collidepoint((x, y)):
+                        self.show_aimove()
+                        self.sync_board()
 
             if event.type == pygame.KEYDOWN:
                 if self.selected_cell:
@@ -219,6 +230,10 @@ class SudokuGraphics:
         pygame.draw.rect(self.screen, self.WHITE, self.buttons['help'][0])
         self.screen.blit(self.buttons['help'][1], self.buttons['help'][2])
 
+        # Draw ai move button
+        pygame.draw.rect(self.screen, self.WHITE, self.buttons['aimove'][0])
+        self.screen.blit(self.buttons['aimove'][1], self.buttons['aimove'][2])
+
     def click_cell(self, x, y):
         for row in self.cell_md:
             for md in row:
@@ -252,6 +267,11 @@ class SudokuGraphics:
                     text = font.render(str(md[5]), True, num_color)
                     text_rect = text.get_rect(center=(x + self.CELL_SIZE // 2, y + self.CELL_SIZE // 2))
                     self.screen.blit(text, text_rect)
+                if md[7] != 0:
+                    x, y = md[1]
+                    text = font.render(str(md[7]), True, self.CYAN)
+                    text_rect = text.get_rect(center=(x + self.CELL_SIZE // 4, y + self.CELL_SIZE // 4))
+                    self.screen.blit(text, text_rect)
 
     def sync_board(self, fresh=False):
         unsolved_board = self.game.get_unsolved()
@@ -274,6 +294,14 @@ class SudokuGraphics:
                             self.cell_md[row][col][4] = self.GREEN
                         else:
                             self.cell_md[row][col][4] = self.RED
+                if self.cell_md[row][col][7] != 0 and current_board[row][col] != 0:
+                    self.cell_md[row][col][7] = 0
 
     def toggle_help(self):
         self.help = not self.help
+
+    def show_aimove(self):
+        aimove = self.game.get_aimove()
+        if aimove != None:
+            row, col, val = aimove
+            self.cell_md[row][col][7] = val

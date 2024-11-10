@@ -1,5 +1,6 @@
 from SudokuBoard import SudokuBoard
 from SudokuGraphics import SudokuGraphics
+from SudokuAgent import SudokuAgent
 import pygame
 import sys
 import copy
@@ -11,7 +12,7 @@ class SudokuGame:
     # 2: Incorrect Guess
     # 3: Invalid Guess that defies rules
 
-    def __init__(self, unsolved=None, solved=None, preload=False, filename='sudoku-3m-kaggle.csv', num_boards=10, visualize=False, help=False, reward=False, rewards=None, verbose=1):
+    def __init__(self, unsolved=None, solved=None, preload=False, filename='sudoku-3m-kaggle.csv', num_boards=10, visualize=False, help=False, reward=False, rewards=None, verbose=1, agentfile=None):
         self.sb = SudokuBoard()
         self.verbose = verbose
         self.unsolved = unsolved
@@ -28,6 +29,8 @@ class SudokuGame:
         self.rewards = None
         self.loaded_unsolved = []
         self.loaded_solved = []
+        self.agentfile = agentfile
+        self.agent = None
 
         if self.reward:
             self.validate_rewards(rewards)
@@ -35,15 +38,18 @@ class SudokuGame:
         if self.preload:
             self.loaded_unsolved, self.loaded_solved, self.loaded_difficulties = self.sb.generate_board_pairs(num_boards=self.num_boards, filename=filename)
 
+        if self.agentfile:
+            self.agent = SudokuAgent(self.agentfile)
+
         # Constants
-        self.WIDTH, self.HEIGHT = 750, 450  # Size of the window
-        self.BOARD_WIDTH, self.BOARD_HEIGHT = 450, 450
-        self.ROWS, self.COLS = 9, 9  # Number of rows and columns
-        self.CELL_SIZE = self.BOARD_WIDTH // self.COLS  # Size of each cell
+        # self.WIDTH, self.HEIGHT = 750, 450  # Size of the window
+        # self.BOARD_WIDTH, self.BOARD_HEIGHT = 450, 450
+        # self.ROWS, self.COLS = 9, 9  # Number of rows and columns
+        # self.CELL_SIZE = self.BOARD_WIDTH // self.COLS  # Size of each cell
 
         # Colors
-        self.LINE_COLOR = (0, 0, 0)
-        self.HIGHLIGHT_COLOR = (173, 216, 230)
+        # self.LINE_COLOR = (0, 0, 0)
+        # self.HIGHLIGHT_COLOR = (173, 216, 230)
 
         self.screen = None
         self.selected_cell = None
@@ -132,6 +138,17 @@ class SudokuGame:
         self.current = copy.deepcopy(self.unsolved)
         self.prev_states = []
 
+    def get_aimove(self):
+        if self.agent != None and self.unsolved != None:
+            row, col, val = self.agent.get_move(self.current)
+            if self.solved[row][col] == val:
+                print(str(row) + ' ' + str(col) + ' ' + str(val))
+                return row, col, val
+            else:
+                return None
+        else:
+            return None
+
     def get_unsolved(self):
         return copy.deepcopy(self.unsolved) if self.unsolved != None else None
 
@@ -155,4 +172,4 @@ class SudokuGame:
             print(text)
 
 if __name__ == "__main__":
-    sg = SudokuGame(preload=True, visualize=True)
+    sg = SudokuGame(preload=True, visualize=True, agentfile='sudoku_sage_1.9_10ep_3milboards.h5')
