@@ -4,6 +4,7 @@ from SudokuAgent import SudokuAgent
 import pygame
 import sys
 import copy
+import time
 
 class SudokuGame:
     # Reward Scheme, by index, this is also the same for the move codes:
@@ -39,20 +40,8 @@ class SudokuGame:
             self.loaded_unsolved, self.loaded_solved, self.loaded_difficulties = self.sb.generate_board_pairs(num_boards=self.num_boards, filename=filename)
 
         if self.agentfile:
-            self.agent = SudokuAgent(self.agentfile)
+            self.agent = SudokuAgent(self.agentfile, verbose=self.verbose)
 
-        # Constants
-        # self.WIDTH, self.HEIGHT = 750, 450  # Size of the window
-        # self.BOARD_WIDTH, self.BOARD_HEIGHT = 450, 450
-        # self.ROWS, self.COLS = 9, 9  # Number of rows and columns
-        # self.CELL_SIZE = self.BOARD_WIDTH // self.COLS  # Size of each cell
-
-        # Colors
-        # self.LINE_COLOR = (0, 0, 0)
-        # self.HIGHLIGHT_COLOR = (173, 216, 230)
-
-        self.screen = None
-        self.selected_cell = None
         self.printv("Created Sudoku Game")
 
         if self.visualize:
@@ -142,7 +131,6 @@ class SudokuGame:
         if self.agent != None and self.unsolved != None:
             row, col, val = self.agent.get_move(self.current)
             if self.solved[row][col] == val:
-                print(str(row) + ' ' + str(col) + ' ' + str(val))
                 return row, col, val
             else:
                 return None
@@ -172,4 +160,35 @@ class SudokuGame:
             print(text)
 
 if __name__ == "__main__":
-    sg = SudokuGame(preload=True, visualize=True, agentfile='sudoku_sage_1.9_10ep_3milboards.h5')
+    stumped_unsolved = []
+    stumped_solved = []
+    correct_moves = 0
+    unsolved_boards = 0
+    solved_boards = 0
+    num_boards = 3000000
+    sg = SudokuGame(preload=True, filename='sudoku-3m-kaggle.csv', num_boards=num_boards, visualize=False, verbose=False, agentfile='sudoku_sage_1.9_10ep_3milboards.h5', reward=True, rewards=[10, 10, -10, -10])
+    start = time.time()
+    for i in range(num_boards):
+        sg.setBoard()
+        while True:
+            ai_move = sg.get_aimove()
+            if ai_move == None:
+                unsolved_boards += 1
+                stumped_unsolved.append(sg.get_current())
+                stumped_solved.append(sg.get_solved())
+                break
+            else:
+                correct_moves += 1
+                _, code = sg.makeMove(ai_move[0], ai_move[1], ai_move[2])
+                if code == 1:
+                    solved_boards += 1
+                    break
+        if i % 50 == 0:
+            print(str(i) + '/' + str(num_boards))
+    end = time.time()
+    print('Finished processing ' + str(num_boards) + ' boards in ' + str(end-start) + ' seconds.'
+            '\nSolved Boards: ' + str(solved_boards) +
+            '\nUnsolved Boards: ' + str(unsolved_boards) +
+            '\nTotal Correct Moves: ' + str(correct_moves))
+    sb = SudokuBoard()
+    sb.write_board_file(stumped_unsolved, stumped_solved, 'sudoku-3m-kaggle-afterstumped1.csv')
